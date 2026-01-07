@@ -36,7 +36,9 @@ INSERT INTO baby_girl_names (name, babies) VALUES
     ('Ava', 70),
     ('Mia', 64);
     
--- Compare ROW_NUMBER, RANL, DENSE_RANK
+-- TRUNCATE TABLE baby_girl_names;
+    
+-- Compare ROW_NUMBER, RANK, DENSE_RANK
 
 SELECT 	name, babies,
 		ROW_NUMBER() OVER (ORDER BY babies DESC) AS row_f,
@@ -44,9 +46,46 @@ SELECT 	name, babies,
         DENSE_RANK() OVER (ORDER BY babies DESC) AS dense_rank_f
 FROM 	baby_girl_names
 ORDER 	BY babies DESC;
+
+-- ---------------------------------------------------------------------------------------------------------------------------------------
+-- Video 69: FIRST_VALUE, LAST_VALUE & NTH VALUE:
+
+CREATE TABLE baby_names (
+	gender 	VARCHAR(10),
+    name	VARCHAR(50),
+    babies 	INT
+);
+
+INSERT INTO baby_names (gender, name, babies) VALUES
+	('Female', 'Charlotte', 80),
+    ('Female', 'Emma', 82),
+    ('Female', 'Olivia', 99),
+    ('Male', 'James', 85),
+    ('Male', 'Liam', 110),
+    ('Male', 'Noah', 95);
     
+SELECT * FROM baby_names;
 
+-- Using it as a subquery:
+SELECT * FROM 
+	(SELECT 	gender, name, babies,
+			FIRST_VALUE(name) OVER (PARTITION BY gender ORDER BY babies DESC) AS top_name
+	FROM	baby_names) AS tn
+WHERE name = top_name;
 
+-- Using it as a CTE:
+
+WITH tn AS 
+    (SELECT 	gender, name, babies,
+			FIRST_VALUE(name) OVER (PARTITION BY gender ORDER BY babies DESC) AS top_name
+	FROM	baby_names)
+SELECT * FROM tn
+WHERE name = top_name;
+
+-- Return the second name
+SELECT 	gender, name, babies,
+			NTH_VALUE(name,2) OVER (PARTITION BY gender ORDER BY babies DESC) AS second_name
+FROM	baby_names;
 
 
 
